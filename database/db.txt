@@ -1,0 +1,111 @@
+CREATE DATABASE  IF NOT EXISTS `project` 
+USE `project`;
+
+DROP TABLE IF EXISTS `admin`;
+CREATE TABLE `admin` (
+  `username` varchar(30) NOT NULL,
+  `emailid` varchar(30) DEFAULT NULL,
+  `name` varchar(45) DEFAULT NULL,
+  `password` varchar(30) NOT NULL,
+  PRIMARY KEY (`username`)
+) 
+
+INSERT INTO `admin` VALUES ('prabhattomar290@gmail.com','prabhattomar290@gmail.com','prabhat','root');
+
+DROP TABLE IF EXISTS `attandance`;
+CREATE TABLE `attandance` (
+  `date` date NOT NULL,
+  `sid` int NOT NULL,
+  `session` varchar(15) DEFAULT NULL,
+  `status` varchar(1) DEFAULT NULL,
+  `aid` int NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`date`,`sid`),
+  UNIQUE KEY `UK_e5eb58nb2u13yglledgj5kgm8` (`aid`),
+  KEY `FKq7nyhvo6e3wcuydds9l16pkmy` (`sid`),
+  CONSTRAINT `FKq7nyhvo6e3wcuydds9l16pkmy` FOREIGN KEY (`sid`) REFERENCES `student` (`sid`)
+)
+
+
+
+
+DROP TABLE IF EXISTS `exam`;
+CREATE TABLE `exam` (
+  `examid` varchar(15) NOT NULL,
+  `max_mark` int NOT NULL,
+  PRIMARY KEY (`examid`)
+) 
+
+
+INSERT INTO `exam` VALUES ('Practical',30),('Theory',70);
+
+DROP TABLE IF EXISTS `result`;
+
+CREATE TABLE `result` (
+  `examid` varchar(15) NOT NULL,
+  `session` varchar(10) NOT NULL,
+  `sid` int NOT NULL,
+  `subject` varchar(15) NOT NULL,
+  `classes` varchar(5) DEFAULT NULL,
+  `marks` int DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `rid` int NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`examid`,`session`,`sid`,`subject`),
+  UNIQUE KEY `UK_qdy9c1ot5oscr7sj74vm6u4pj` (`rid`),
+  KEY `studentresult_fk_idx` (`sid`),
+  CONSTRAINT `examresul_fk` FOREIGN KEY (`examid`) REFERENCES `exam` (`examid`),
+  CONSTRAINT `studentresult_fk` FOREIGN KEY (`sid`) REFERENCES `student` (`sid`)
+) 
+
+
+
+
+DROP TABLE IF EXISTS `student`;
+
+CREATE TABLE `student` (
+  `sid` int NOT NULL AUTO_INCREMENT,
+  `classes` varchar(5) NOT NULL,
+  `name` varchar(45) NOT NULL,
+  `addmissiondate` date NOT NULL,
+  `father_name` varchar(45) NOT NULL,
+  `gender` varchar(6) NOT NULL,
+  `dob` date NOT NULL,
+  `emailid` varchar(30) NOT NULL,
+  `mobile_no` varchar(20) NOT NULL,
+  `address` varchar(45) NOT NULL,
+  `pincode` int NOT NULL,
+  `status` varchar(10) NOT NULL,
+  `password` varchar(30) NOT NULL,
+  PRIMARY KEY (`sid`)
+) 
+
+
+DELIMITER ;;
+CREATE PROCEDURE `attandancereport`(id int)
+begin
+ select count(*) as count from attandance where sid=id and status="P"and session=(select max(session) from attandance where sid=id)
+union
+ select count(*) as count from attandance where sid=id and status="A" and session=(select max(session) from attandance where sid=id);
+end ;;
+DELIMITER ;
+
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `examresult`(id int)
+begin
+select a.*,b.max_mark from result a inner join exam b on a.examid=b.examid and a.sid=id  and a.session=(select max(session) from result where sid=id) order by examid desc;
+end ;;
+DELIMITER ;
+
+DELIMITER ;;
+CREATE PROCEDURE `resultbyid`(id int)
+begin
+select *  from result where sid=id order by examid desc;
+end ;;
+DELIMITER ;
+
+DELIMITER ;;
+CREATE PROCEDURE `resultbysid`(id int)
+begin
+select a.*,b.subject as tsubject,b.marks as tmark  from result a,result b where a.examid="Practical" and b.examid="Theory" and a.subject=b.subject and  a.sid=id and b.sid=id and a.session=(select max(session) from result c where c.sid=id) and b.session=(select max(session) from result d where d.sid=id);
+end ;;
+DELIMITER ;
+

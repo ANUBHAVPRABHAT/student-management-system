@@ -1,0 +1,2 @@
+# student-management-system
+Student Management System is developed using React as frontend ,Spring Boot as backend and MySQL as Database. This Web Application is design to handle all student details. It has two character Admin and Student. Admin have functionality such as login, logout ,change password and can perform all crud operation on student personal details ,result, attendance .Student can only view this details after login and able to change password .All Student will only able to see there last result.
